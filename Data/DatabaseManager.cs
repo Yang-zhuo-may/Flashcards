@@ -60,6 +60,7 @@ namespace Flashcards.Data
                         SessionId INTEGER PRIMARY KEY IDENTITY(1,1),
                         Date DATETIME NOT NULL,
                         Score INT,
+                        StackName NVARCHAR(100) NOT NULL, 
                         Stack_id INTEGER NOT NULL,
                         CONSTRAINT fk_stack_session
                             FOREIGN KEY (Stack_id) 

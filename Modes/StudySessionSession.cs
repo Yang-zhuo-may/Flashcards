@@ -8,9 +8,10 @@ namespace Flashcards.Modes
 {
     internal class StudySessionSession
     {
-        public string SessionName { get; set; }
+        public int SessionId { get; set; }
         public DateTime Date { get; set; }
         public int Score { get; set; }
         public string StackName {  get; set; }
+        public int StackId { get; set; }
     }
 }

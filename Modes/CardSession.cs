@@ -11,6 +11,6 @@ namespace Flashcards.Modes
         public int Id { get; set; }
         public string Front {  get; set; }
         public string Back { get; set; }
-        public string StackName { get; set; }
+        public int StackId { get; set; }
     }
 }

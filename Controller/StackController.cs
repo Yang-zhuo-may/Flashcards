@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -42,12 +43,30 @@ namespace Flashcards.Controller
             }
         }
 
-        public static int GetStackId(string stackName)
+        public static string GetStackId(string stackName)
         {
+            int isExists = 1;
             Dictionary<string, int> stackTable = new Dictionary<string, int>();
+
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
+
+                do
+                {
+                    if (isExists == 0)
+                    {
+                        Console.WriteLine($"{stackName} doesn't exists. Please enter another stack. Or 0 to return");
+                        stackName = Console.ReadLine();
+
+                        if (stackName == "0") break;
+                    }
+
+                    var sqlQuery = connection.CreateCommand();
+                    sqlQuery.CommandText = $"IF EXISTS (SELECT 1 FROM dbo.stacks WHERE StackName = '{stackName}') SELECT 1 ELSE SELECT 0;";
+                    isExists = (int)sqlQuery.ExecuteScalar();
+
+                } while (isExists == 0);
 
                 var tableComd = connection.CreateCommand();
                 tableComd.CommandText = "SELECT StackId, StackName FROM dbo.stacks;";
@@ -63,7 +82,7 @@ namespace Flashcards.Controller
 
                 reader.Close();
             }
-            return stackTable[stackName];
+            return stackTable[stackName].ToString();
         }
 
         public static void Insert(string stackName)
@@ -81,11 +100,12 @@ namespace Flashcards.Controller
             }
         }
 
-        public static void Update(int stackId)
+        public static void Update()
         {
-            string stackName = null;
             int exists = 1;
             bool validInput = true;
+            int Id;
+            string stackId = null;
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -93,21 +113,28 @@ namespace Flashcards.Controller
 
                 do
                 {
-                    if (validInput == false) Console.WriteLine("INVALID INPUT, please enter a integer.");
-                    else if (exists == 0) Console.WriteLine($"Stack-{stackId} doesn't exists. Please enter another stack.");
+                    if (validInput == false) Console.WriteLine("INVALID INPUT.");
+                    else if (exists == 0) Console.WriteLine($"Stack - {stackId} doesn't exists. ");
+
+                    Console.WriteLine("Please enter the id of the stack or 0 to return.");
+                    validInput = int.TryParse(Console.ReadLine(), out Id);
+
+                    if (Id == 0) return;
 
                     var sqlQuery = connection.CreateCommand();
-                    sqlQuery.CommandText = $"IF EXSIST (SELECT 1 FROM dbo.stacks WHERE StackId = '{stackId}') SELECT 1 ELSE SELECT 0";
+                    sqlQuery.CommandText = $"SELECT CASE WHEN  EXISTS (SELECT 1 FROM dbo.stacks WHERE StackId = {Id.ToString()}) THEN 1 ELSE 0 END;";
 
                     exists = (int)sqlQuery.ExecuteScalar();
 
-                    Console.WriteLine("Please enter the new name");
-                    validInput = int.TryParse(Console.ReadLine(), out int Id); 
-
                 } while (exists == 0 || validInput == false);
 
-                    var tableComd = connection.CreateCommand();
-                    tableComd.CommandText = $"UPDATE dbo.stacks SET StackName = '{stackName} WHERE StackId = {stackId}';";
+                Console.WriteLine("Please enter the new name or 0 to return");
+                string stackName = Console.ReadLine();
+
+                if (stackName == "0") return;
+
+                var tableComd = connection.CreateCommand();
+                    tableComd.CommandText = $"UPDATE dbo.stacks SET StackName = '{stackName}' WHERE StackId = {Id};";
 
                 tableComd.ExecuteNonQuery();
 
@@ -115,10 +142,12 @@ namespace Flashcards.Controller
             }
         }
 
-        public static void Detele(int stackId)
+        public static void Detele()
         {
             int exists = 1;
             bool validInput = true;
+            int Id;
+            string stackId = null;
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -126,19 +155,22 @@ namespace Flashcards.Controller
 
                 do
                 {
+                    Console.WriteLine("Please enter the id of the stack");
+                    validInput = int.TryParse(Console.ReadLine(), out Id);
+
+                    if (Id == 0) return;
                     if (validInput == false)  Console.WriteLine("INVALID INPUT, please enter a integer.");
                     else if (exists == 0) Console.WriteLine($"Stack-{stackId} doesn't exists. Please enter another stack.");
 
                     var sqlQuery = connection.CreateCommand();
-                    sqlQuery.CommandText = $"IF EXSIST (SELECT 1 FROM dbo.stacks WHERE StackId = '{stackId}') SELECT 1 ELSE SELECT 0";
+                    sqlQuery.CommandText = $"SELECT CASE WHEN  EXISTS (SELECT 1 FROM dbo.stacks WHERE StackId = {Id.ToString()}) THEN 1 ELSE 0 END;";
 
                     exists = (int)sqlQuery.ExecuteScalar();
-                    validInput = int.TryParse(Console.ReadLine(), out int Id);
 
                 } while (exists == 0 || validInput == false);
 
                 var tableComd = connection.CreateCommand();
-                tableComd.CommandText = $"DELETE FROM dbo.stacks WHERE StackId='{stackId}';";
+                tableComd.CommandText = $"DELETE FROM dbo.stacks WHERE StackId='{Id.ToString()}';";
 
 
                 tableComd.ExecuteNonQuery();

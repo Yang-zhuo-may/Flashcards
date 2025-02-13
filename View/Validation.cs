@@ -8,15 +8,6 @@ namespace Flashcards.View
 {
     internal class Validation
     {
-        public static string GetStackName()
-        {
-            string stackName = "";
-
-            // Check if it's exsits
-
-            return stackName;
-        }
-
 
     }
 }

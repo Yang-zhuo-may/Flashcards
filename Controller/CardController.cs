@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Flashcards.Data;
+using Flashcards.DTOs;
 using Flashcards.Modes;
 using Flashcards.View;
 using Microsoft.Data.SqlClient;
@@ -17,47 +18,7 @@ namespace Flashcards.Controller
         static string? connectionString = ConfigHelper.GetConnectionString();
         public static void View(string StackName)
         {
-            int isExists = 1;
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                List<CardSession> tableCard = new List<CardSession>();
-
-                do
-                {
-                    if (isExists == 0) Console.WriteLine($"{StackName} doesn't exists. Please enter another stack.");
-
-                    var sqlQuery = connection.CreateCommand();
-                    sqlQuery.CommandText = $"IF EXISTS (SELECT 1 FROM dbo.stacks WHERE StackName = '{StackName}') SELECT 1 ELSE SELECT 0;";
-                    isExists = (int)sqlQuery.ExecuteScalar();
-
-                    // Console.WriteLine("Please enter the stack's name");
-                    // string userInput = Console.ReadLine();
-                } while (isExists == 0);
-
-                var tableComd = connection.CreateCommand();
-
-                string stackId = StackController.GetStackId(StackName).ToString();
-                tableComd.CommandText = $"SELECT CardId, Front, Back FROM dbo.cards WHERE Stack_id = {stackId};";
-
-                SqlDataReader reader = tableComd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    foreach (var card in tableCard)
-                    {
-                        card.Id = reader.GetInt32(0);
-                        card.Front = reader.GetString(1);
-                        card.Back = reader.GetString(2);
-                        card.StackName = reader.GetString(3);
-                    }
-                }
-
-                reader.Close();
-                TableVisualisationEngine.ShowCardTable(tableCard);
-            }
+            TableVisualisationEngine.ShowCardTable(GetTheCards(StackName));          
         }
 
         public static void Insert(string front, string back, string stackId)
@@ -78,31 +39,47 @@ namespace Flashcards.Controller
         {
             int isExists = 1;
             bool validInput = true;
+            int Id;
 
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
+                int dataID = CardMapper.GetCardDataID(cardId);
+
                 do
                 {
+                    if (dataID == 0) isExists = 0;
+
                     if (isExists == 0) Console.WriteLine($"Card-{cardId} doesn't exists. Please enter another stack.");
                     else if (validInput == false) Console.WriteLine("INVALID INPUT, please enter a integer.");
 
+                    if (isExists == 0 || validInput == false)
+                    {
+                        Console.WriteLine("Please enter the new id");
+                        validInput = int.TryParse(Console.ReadLine(), out Id);
+
+                        if (Id == 0) return;
+                    }
+
                     var sqlQuery = connection.CreateCommand();
-                    sqlQuery.CommandText = $"IF EXISTS (SELECT 1 FROM dob.cards WHERE CardId = {cardId}) SELECT 1 ELSE SELECT 0;";
+                    sqlQuery.CommandText = $"IF EXISTS (SELECT 1 FROM dbo.cards WHERE CardId = {dataID}) SELECT 1 ELSE SELECT 0;";
                     isExists = (int)sqlQuery.ExecuteScalar();
 
-                    Console.WriteLine("Please enter the new name");
-                    validInput = int.TryParse(Console.ReadLine(), out int Id);
-                } while (isExists == 0);
+                } while (isExists == 0 || validInput == false);
 
                 Console.WriteLine("Please the front");
                 string front = Console.ReadLine();
+
+                if (front == "0") return;
+
                 Console.WriteLine("Please the back");
                 string back = Console.ReadLine();
 
+                if (back == "0") return;
+
                 var tableComd = connection.CreateCommand();
-                tableComd.CommandText = $"UPDATE dbo.cards SET Front = '{front}', Back = '{back}'";
+                tableComd.CommandText = $"UPDATE dbo.cards SET Front = '{front}', Back = '{back}' WHERE CardId = {dataID}";
 
                 tableComd.ExecuteNonQuery();
                 connection.Close();
@@ -113,6 +90,7 @@ namespace Flashcards.Controller
         {
             int isExists = 1;
             bool validInput = true;
+            int Id;
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -123,12 +101,18 @@ namespace Flashcards.Controller
                     if (isExists == 0) Console.WriteLine($"Card-{cardId} doesn't exists. Please enter another stack.");
                     else if (validInput == false) Console.WriteLine("INVALID INPUT, please enter a integer.");
 
+                    if (isExists == 0 || validInput == false)
+                    {
+                        Console.WriteLine("Please enter the new id");
+                        validInput = int.TryParse(Console.ReadLine(), out Id);
+
+                        if (Id == 0) return;
+                     }
+
                     var sqlQuery = connection.CreateCommand();
-                    sqlQuery.CommandText = $"IF EXISTS (SELECT 1 FROM dob.cards WHERE CardId = {cardId}) SELECT 1 ELSE SELECT 0;";
+                    sqlQuery.CommandText = $"IF EXISTS (SELECT 1 FROM dbo.cards WHERE CardId = {cardId}) SELECT 1 ELSE SELECT 0;";
                     isExists = (int)sqlQuery.ExecuteScalar();
 
-                    Console.WriteLine("Please enter the new name");
-                    validInput = int.TryParse(Console.ReadLine(), out int Id);
                 } while (isExists == 0);
 
                 var tabtableCmd = connection.CreateCommand();
@@ -136,6 +120,47 @@ namespace Flashcards.Controller
 
                 tabtableCmd.ExecuteNonQuery();
                 connection.Close();
+            }
+        }
+
+        public static List<CardDTO> Study(string StackName)
+        {
+            return GetTheCards(StackName);
+        }
+
+        public static List<CardDTO> GetTheCards(string StackName)
+        {
+            string StackId = StackController.GetStackId(StackName);
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                List<CardSession> tableCard = new List<CardSession>();
+
+                var tableComd = connection.CreateCommand();
+
+                tableComd.CommandText = $"SELECT CardId, Front, Back, Stack_id FROM dbo.cards WHERE Stack_id = {StackId};";
+
+                SqlDataReader reader = tableComd.ExecuteReader();
+
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        tableCard.Add(new CardSession
+                        {
+                            Id = reader.GetInt32(0),
+                            Front = reader.GetString(1),
+                            Back = reader.GetString(2),
+                            StackId = reader.GetInt32(3),
+                        });
+                    }
+                }
+
+                reader.Close();
+                List<CardDTO> cardDTOs = CardMapper.TransitionToDTO(tableCard);
+                return cardDTOs;
             }
         }
 
