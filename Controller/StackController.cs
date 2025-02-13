@@ -59,7 +59,7 @@ namespace Flashcards.Controller
                         Console.WriteLine($"{stackName} doesn't exists. Please enter another stack. Or 0 to return");
                         stackName = Console.ReadLine();
 
-                        if (stackName == "0") break;
+                        if (stackName == "0") return "";
                     }
 
                     var sqlQuery = connection.CreateCommand();
@@ -73,11 +73,17 @@ namespace Flashcards.Controller
 
                 SqlDataReader reader = tableComd.ExecuteReader();
 
-                while (reader.Read())
+                if (reader.HasRows)
                 {
-                    int id = reader.GetInt32(0);
-                    string name = reader.GetString(1);
-                    stackTable.Add(name, id);
+                    while (reader.Read())
+                    {
+                        int id = reader.GetInt32(0);
+                        string name = reader.GetString(1);
+                        stackTable.Add(name, id);
+                    }
+                } else
+                {
+                    Console.WriteLine("The id doesn't exists in the database.");
                 }
 
                 reader.Close();
@@ -118,8 +124,6 @@ namespace Flashcards.Controller
 
                     Console.WriteLine("Please enter the id of the stack or 0 to return.");
                     validInput = int.TryParse(Console.ReadLine(), out Id);
-
-                    if (Id == 0) return;
 
                     var sqlQuery = connection.CreateCommand();
                     sqlQuery.CommandText = $"SELECT CASE WHEN  EXISTS (SELECT 1 FROM dbo.stacks WHERE StackId = {Id.ToString()}) THEN 1 ELSE 0 END;";

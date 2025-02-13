@@ -58,8 +58,6 @@ namespace Flashcards.Controller
                     {
                         Console.WriteLine("Please enter the new id");
                         validInput = int.TryParse(Console.ReadLine(), out Id);
-
-                        if (Id == 0) return;
                     }
 
                     var sqlQuery = connection.CreateCommand();
@@ -96,8 +94,10 @@ namespace Flashcards.Controller
             {
                 connection.Open();
 
+                int dataID = CardMapper.GetCardDataID(cardId);
                 do
                 {
+                    if (dataID == 0) isExists = 0;
                     if (isExists == 0) Console.WriteLine($"Card-{cardId} doesn't exists. Please enter another stack.");
                     else if (validInput == false) Console.WriteLine("INVALID INPUT, please enter a integer.");
 
@@ -105,18 +105,16 @@ namespace Flashcards.Controller
                     {
                         Console.WriteLine("Please enter the new id");
                         validInput = int.TryParse(Console.ReadLine(), out Id);
-
-                        if (Id == 0) return;
                      }
 
                     var sqlQuery = connection.CreateCommand();
-                    sqlQuery.CommandText = $"IF EXISTS (SELECT 1 FROM dbo.cards WHERE CardId = {cardId}) SELECT 1 ELSE SELECT 0;";
+                    sqlQuery.CommandText = $"IF EXISTS (SELECT 1 FROM dbo.cards WHERE CardId = {dataID}) SELECT 1 ELSE SELECT 0;";
                     isExists = (int)sqlQuery.ExecuteScalar();
 
                 } while (isExists == 0);
 
                 var tabtableCmd = connection.CreateCommand();
-                tabtableCmd.CommandText = $"DELETE FROM cards WHERE StackName='{cardId}';";
+                tabtableCmd.CommandText = $"DELETE FROM cards WHERE CardId = {dataID};";
 
                 tabtableCmd.ExecuteNonQuery();
                 connection.Close();

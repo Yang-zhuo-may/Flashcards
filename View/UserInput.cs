@@ -126,7 +126,12 @@ namespace Flashcards.View
                         StackController.View();
                         Console.WriteLine("Enter a name of stack.");
                         string userChoice = Console.ReadLine();
+                        if (userChoice == "0") return;
+                        
+                        if (StackController.GetStackId(userChoice) == "") Console.ReadKey();
+                        else
                         ChoosenStackMenu(userChoice);
+
                         Console.Clear();
                         break;
 
@@ -172,6 +177,7 @@ namespace Flashcards.View
                         StackController.View();
                         Console.WriteLine("Enter a name of stack.");
                         string userChoice = Console.ReadLine();
+                        if (userChoice == "0") return;
                         ChoosenStackMenu(userChoice);
                         Console.Clear();
                         break;
@@ -188,8 +194,10 @@ namespace Flashcards.View
                         Console.Clear();
                         Console.WriteLine("Please enter the front of the card");
                         string front = Console.ReadLine();
+                        if (front == "0") return;
                         Console.WriteLine("Please enter the back of the card");
                         string back = Console.ReadLine();
+                        if (back == "0") return;
                         CardController.Insert(front, back, id);
                         Console.Clear();
                         break;
@@ -198,7 +206,9 @@ namespace Flashcards.View
                         Console.Clear();
                         CardController.View(stackName);
                         Console.WriteLine("Please enter the id of the card");
-                        CardController.Update(Console.ReadLine());
+                        string updateID = Console.ReadLine();
+                        if (updateID == "0") return;
+                        CardController.Update(updateID);
                         Console.Clear();
                         break;
 
@@ -206,7 +216,11 @@ namespace Flashcards.View
                         Console.Clear();
                         CardController.View(stackName);
                         Console.WriteLine("Please enter the id of the card");
-                        CardController.Detele(Console.ReadLine());
+                        string deteleId = Console.ReadLine();
+                        if (deteleId == "0") return;
+                        CardController.Detele(deteleId);
+                        CardController.View(stackName);
+                        Console.ReadKey();
                         Console.Clear();
                         break;
 
