@@ -28,7 +28,10 @@ namespace Flashcards.Controller
                 connection.Open();
 
                 var tabtableCmd = connection.CreateCommand();
-                tabtableCmd.CommandText = $"INSERT INTO cards (Front, Back, Stack_id) VALUES (N'{front}', N'{back}', '{stackId}');";
+                tabtableCmd.CommandText = $"INSERT INTO cards (Front, Back, Stack_id) VALUES (@front, @back, @stackId);";
+                tabtableCmd.Parameters.AddWithValue("@front", front);
+                tabtableCmd.Parameters.AddWithValue("@back", back);
+                tabtableCmd.Parameters.AddWithValue("@stackId", stackId);
 
                 tabtableCmd.ExecuteNonQuery();
                 connection.Close();
@@ -61,7 +64,9 @@ namespace Flashcards.Controller
                     }
 
                     var sqlQuery = connection.CreateCommand();
-                    sqlQuery.CommandText = $"IF EXISTS (SELECT 1 FROM dbo.cards WHERE CardId = {dataID}) SELECT 1 ELSE SELECT 0;";
+                    sqlQuery.CommandText = $"IF EXISTS (SELECT 1 FROM dbo.cards WHERE CardId = @dataID) SELECT 1 ELSE SELECT 0;";
+                    sqlQuery.Parameters.AddWithValue("@dataID", dataID);
+
                     isExists = (int)sqlQuery.ExecuteScalar();
 
                 } while (isExists == 0 || validInput == false);
@@ -77,7 +82,10 @@ namespace Flashcards.Controller
                 if (back == "0") return;
 
                 var tableComd = connection.CreateCommand();
-                tableComd.CommandText = $"UPDATE dbo.cards SET Front = '{front}', Back = '{back}' WHERE CardId = {dataID}";
+                tableComd.CommandText = $"UPDATE dbo.cards SET Front = @front, Back = @back WHERE CardId = @dataID";
+                tableComd.Parameters.AddWithValue("@front", front);
+                tableComd.Parameters.AddWithValue("@back", back);
+                tableComd.Parameters.AddWithValue("@dataID", dataID);
 
                 tableComd.ExecuteNonQuery();
                 connection.Close();
@@ -108,13 +116,16 @@ namespace Flashcards.Controller
                      }
 
                     var sqlQuery = connection.CreateCommand();
-                    sqlQuery.CommandText = $"IF EXISTS (SELECT 1 FROM dbo.cards WHERE CardId = {dataID}) SELECT 1 ELSE SELECT 0;";
+                    sqlQuery.CommandText = $"IF EXISTS (SELECT 1 FROM dbo.cards WHERE CardId = @dataID) SELECT 1 ELSE SELECT 0;";
+                    sqlQuery.Parameters.AddWithValue ("@dataID", dataID);
+
                     isExists = (int)sqlQuery.ExecuteScalar();
 
                 } while (isExists == 0);
 
                 var tabtableCmd = connection.CreateCommand();
-                tabtableCmd.CommandText = $"DELETE FROM cards WHERE CardId = {dataID};";
+                tabtableCmd.CommandText = $"DELETE FROM cards WHERE CardId = @dataID;";
+                tabtableCmd.Parameters.AddWithValue("@dataID", dataID);
 
                 tabtableCmd.ExecuteNonQuery();
                 connection.Close();
@@ -138,7 +149,8 @@ namespace Flashcards.Controller
 
                 var tableComd = connection.CreateCommand();
 
-                tableComd.CommandText = $"SELECT CardId, Front, Back, Stack_id FROM dbo.cards WHERE Stack_id = {StackId};";
+                tableComd.CommandText = $"SELECT CardId, Front, Back, Stack_id FROM dbo.cards WHERE Stack_id = @StackId;";
+                tableComd.Parameters.AddWithValue("@StackId", StackId);
 
                 SqlDataReader reader = tableComd.ExecuteReader();
 

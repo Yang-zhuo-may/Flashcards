@@ -63,7 +63,9 @@ namespace Flashcards.Controller
                     }
 
                     var sqlQuery = connection.CreateCommand();
-                    sqlQuery.CommandText = $"IF EXISTS (SELECT 1 FROM dbo.stacks WHERE StackName = '{stackName}') SELECT 1 ELSE SELECT 0;";
+                    sqlQuery.CommandText = $"IF EXISTS (SELECT 1 FROM dbo.stacks WHERE StackName = @stackName) SELECT 1 ELSE SELECT 0;";
+                    sqlQuery.Parameters.AddWithValue("@stackName", stackName);
+
                     isExists = (int)sqlQuery.ExecuteScalar();
 
                 } while (isExists == 0);
@@ -98,7 +100,8 @@ namespace Flashcards.Controller
                 connection.Open();
 
                 var tableComd = connection.CreateCommand();
-                tableComd.CommandText = $"INSERT INTO dbo.stacks (StackName) VALUES ('{stackName}');";
+                tableComd.CommandText = $"INSERT INTO dbo.stacks (StackName) VALUES (@stackName);";
+                tableComd.Parameters.AddWithValue("@stackName", stackName);
 
                 tableComd.ExecuteNonQuery();
 
@@ -126,7 +129,8 @@ namespace Flashcards.Controller
                     validInput = int.TryParse(Console.ReadLine(), out Id);
 
                     var sqlQuery = connection.CreateCommand();
-                    sqlQuery.CommandText = $"SELECT CASE WHEN  EXISTS (SELECT 1 FROM dbo.stacks WHERE StackId = {Id.ToString()}) THEN 1 ELSE 0 END;";
+                    sqlQuery.CommandText = $"SELECT CASE WHEN  EXISTS (SELECT 1 FROM dbo.stacks WHERE StackId = @Id) THEN 1 ELSE 0 END;";
+                    sqlQuery.Parameters.AddWithValue ("@Id", Id.ToString());
 
                     exists = (int)sqlQuery.ExecuteScalar();
 
@@ -138,7 +142,9 @@ namespace Flashcards.Controller
                 if (stackName == "0") return;
 
                 var tableComd = connection.CreateCommand();
-                    tableComd.CommandText = $"UPDATE dbo.stacks SET StackName = '{stackName}' WHERE StackId = {Id};";
+                    tableComd.CommandText = $"UPDATE dbo.stacks SET StackName = @stackName WHERE StackId = @Id;";
+                tableComd.Parameters.AddWithValue("@stackName", stackName);
+                tableComd.Parameters.AddWithValue("@Id", Id);
 
                 tableComd.ExecuteNonQuery();
 
@@ -167,15 +173,16 @@ namespace Flashcards.Controller
                     else if (exists == 0) Console.WriteLine($"Stack-{stackId} doesn't exists. Please enter another stack.");
 
                     var sqlQuery = connection.CreateCommand();
-                    sqlQuery.CommandText = $"SELECT CASE WHEN  EXISTS (SELECT 1 FROM dbo.stacks WHERE StackId = {Id.ToString()}) THEN 1 ELSE 0 END;";
+                    sqlQuery.CommandText = $"SELECT CASE WHEN  EXISTS (SELECT 1 FROM dbo.stacks WHERE StackId = @Id) THEN 1 ELSE 0 END;";
+                    sqlQuery.Parameters.AddWithValue("@Id", Id.ToString());
 
                     exists = (int)sqlQuery.ExecuteScalar();
 
                 } while (exists == 0 || validInput == false);
 
                 var tableComd = connection.CreateCommand();
-                tableComd.CommandText = $"DELETE FROM dbo.stacks WHERE StackId='{Id.ToString()}';";
-
+                tableComd.CommandText = $"DELETE FROM dbo.stacks WHERE StackId=@Id;";
+                tableComd.Parameters.AddWithValue("@Id", Id.ToString());
 
                 tableComd.ExecuteNonQuery();
 
