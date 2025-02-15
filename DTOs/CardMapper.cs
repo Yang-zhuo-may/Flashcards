@@ -22,10 +22,8 @@ namespace Flashcards.DTOs
             {
                 interfaceID++;
                 card_Id.Add(interfaceID, cards[i].Id);
-
                 cardDTOs.Add(new CardDTO { Front = cards[i].Front, Back = cards[i].Back });
             }
-
             return cardDTOs;
         }
 

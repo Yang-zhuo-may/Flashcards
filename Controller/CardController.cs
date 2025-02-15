@@ -32,7 +32,6 @@ namespace Flashcards.Controller
                 tabtableCmd.Parameters.AddWithValue("@front", front);
                 tabtableCmd.Parameters.AddWithValue("@back", back);
                 tabtableCmd.Parameters.AddWithValue("@stackId", stackId);
-
                 tabtableCmd.ExecuteNonQuery();
                 connection.Close();
             }
@@ -41,13 +40,12 @@ namespace Flashcards.Controller
         public static void Update(string cardId)
         {
             int isExists = 1;
-            bool validInput = true;
             int Id;
+            bool validInput = true;
 
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-
                 int dataID = CardMapper.GetCardDataID(cardId);
 
                 do
@@ -73,12 +71,10 @@ namespace Flashcards.Controller
 
                 Console.WriteLine("Please the front");
                 string front = Console.ReadLine();
-
                 if (front == "0") return;
 
                 Console.WriteLine("Please the back");
                 string back = Console.ReadLine();
-
                 if (back == "0") return;
 
                 var tableComd = connection.CreateCommand();
@@ -86,7 +82,6 @@ namespace Flashcards.Controller
                 tableComd.Parameters.AddWithValue("@front", front);
                 tableComd.Parameters.AddWithValue("@back", back);
                 tableComd.Parameters.AddWithValue("@dataID", dataID);
-
                 tableComd.ExecuteNonQuery();
                 connection.Close();
             }
@@ -95,14 +90,14 @@ namespace Flashcards.Controller
         public static void Detele(string cardId)
         {
             int isExists = 1;
-            bool validInput = true;
             int Id;
+            bool validInput = true;
 
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-
                 int dataID = CardMapper.GetCardDataID(cardId);
+
                 do
                 {
                     if (dataID == 0) isExists = 0;
@@ -126,7 +121,6 @@ namespace Flashcards.Controller
                 var tabtableCmd = connection.CreateCommand();
                 tabtableCmd.CommandText = $"DELETE FROM cards WHERE CardId = @dataID;";
                 tabtableCmd.Parameters.AddWithValue("@dataID", dataID);
-
                 tabtableCmd.ExecuteNonQuery();
                 connection.Close();
             }
@@ -148,10 +142,8 @@ namespace Flashcards.Controller
                 List<CardSession> tableCard = new List<CardSession>();
 
                 var tableComd = connection.CreateCommand();
-
                 tableComd.CommandText = $"SELECT CardId, Front, Back, Stack_id FROM dbo.cards WHERE Stack_id = @StackId;";
                 tableComd.Parameters.AddWithValue("@StackId", StackId);
-
                 SqlDataReader reader = tableComd.ExecuteReader();
 
                 if (reader.HasRows)

@@ -22,7 +22,6 @@ namespace Flashcards.Controller
             using (var connection = new SqlConnection(connectionString))
             {
                 SqlCommand command = new SqlCommand(sqlQuery, connection);
-
                 command.Parameters.AddWithValue("@dateTime", dateTime);
                 command.Parameters.AddWithValue("@Score", Score);
                 command.Parameters.AddWithValue("@stackId", stackId);
@@ -48,10 +47,8 @@ namespace Flashcards.Controller
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-
                 var tableComd = connection.CreateCommand();
                 tableComd.CommandText = $"SELECT SessionId, Date, Score, StackName FROM dbo.stack_session;";
-
                 SqlDataReader reader = tableComd.ExecuteReader();
 
                 while (reader.Read())

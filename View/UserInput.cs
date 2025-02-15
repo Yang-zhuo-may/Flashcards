@@ -21,8 +21,6 @@ namespace Flashcards.View
             Console.Clear();
             bool closeApp = false;
 
-            string name, Id;
-
             while (closeApp == false)
             {
                 Console.WriteLine("FlashCards");
@@ -127,11 +125,9 @@ namespace Flashcards.View
                         Console.WriteLine("Enter a name of stack.");
                         string userChoice = Console.ReadLine();
                         if (userChoice == "0") return;
-                        
                         if (StackController.GetStackId(userChoice) == "") Console.ReadKey();
                         else
                         ChoosenStackMenu(userChoice);
-
                         Console.Clear();
                         break;
 
@@ -156,10 +152,9 @@ namespace Flashcards.View
                 Console.WriteLine("0 Return to upper menu");
                 Console.WriteLine("1 Change current stack");
                 Console.WriteLine("2 View all Flashcards in stack");
-                Console.WriteLine("3 View X amount of cards in stack");
-                Console.WriteLine("4 Creat a Flashcard in current stack");
-                Console.WriteLine("5 Edit a Flashcard");
-                Console.WriteLine("6 Delete a Flashcard");
+                Console.WriteLine("3 Creat a Flashcard in current stack");
+                Console.WriteLine("4 Edit a Flashcard");
+                Console.WriteLine("5 Delete a Flashcard");
                 Console.WriteLine("------------------");
 
                 string userInput = Console.ReadLine();
@@ -190,7 +185,7 @@ namespace Flashcards.View
                         Console.Clear();
                         break;
 
-                    case "4":
+                    case "3":
                         Console.Clear();
                         Console.WriteLine("Please enter the front of the card");
                         string front = Console.ReadLine();
@@ -202,7 +197,7 @@ namespace Flashcards.View
                         Console.Clear();
                         break;
 
-                    case "5":
+                    case "4":
                         Console.Clear();
                         CardController.View(stackName);
                         Console.WriteLine("Please enter the id of the card");
@@ -212,7 +207,7 @@ namespace Flashcards.View
                         Console.Clear();
                         break;
 
-                    case "6":
+                    case "5":
                         Console.Clear();
                         CardController.View(stackName);
                         Console.WriteLine("Please enter the id of the card");
@@ -241,7 +236,6 @@ namespace Flashcards.View
             StackController.View();
             Console.WriteLine("Enter a name of stack.");
             string userChoice = Console.ReadLine();
-
             cardDTOs = CardController.Study(userChoice);
 
             foreach (var card in cardDTOs)
@@ -269,7 +263,8 @@ namespace Flashcards.View
 
                     Console.WriteLine($"Your answer was {checking}. Press any key to continue.");
                     Console.ReadKey();
-                } else
+                } 
+                else
                 {
                     Console.WriteLine($"-----------------------");
                     Console.WriteLine($"Exiting Study Session.");
